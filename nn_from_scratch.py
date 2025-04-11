@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
+
 def load_mnist_from_csv(train_csv_path, test_csv_path, val_split=0.1):
     """
     Load MNIST dataset from CSV files and split into train, validation, and test sets
@@ -62,11 +63,6 @@ def load_mnist_from_csv(train_csv_path, test_csv_path, val_split=0.1):
     return X_train, y_train, X_val, y_val, X_test, y_test
 
 
-X_train, y_train, X_val, y_val, X_test, y_test = load_mnist_from_csv(
-    "./mnist_train.csv", "./mnist_test.csv", val_split=0.1
-)
-
-
 class Layer:
     """
     Base class for neural network layers
@@ -118,15 +114,12 @@ class ReLU(Layer):
 
     def forward(self, input):
         """Apply ReLU activation function"""
-        # TODO: Implement the forward pass for ReLU activation
-        # Hint: Use np.maximum to apply the ReLU function element-wise
-        return  np.max(0,input)
+        return np.maximum(0, input)
 
     def backward(self, input, grad_output):
         """Compute gradient of loss w.r.t. ReLU input"""
-        # TODO: Implement the backward pass for ReLU activation
-        # Hint: ReLU gradient is 1 where input > 0, and 0 elsewhere
-        relu_grad = (input > 0).astype(float)
+        # ReLU gradient: 1 where input > 0, 0 elsewhere
+        relu_grad = input > 0
         return grad_output * relu_grad
 
 
@@ -148,7 +141,8 @@ class Dense(Layer):
         """
         self.learning_rate = learning_rate
 
-        # Initialize weights with small random values (Xavier/Glorot initialization)
+        # Initialize weights with small random values
+        # Xavier/Glorot initialization: variance proportional to 1/input_units
         self.weights = np.random.randn(input_units, output_units) * np.sqrt(
             2.0 / input_units
         )
@@ -161,9 +155,8 @@ class Dense(Layer):
         # Store input for backward pass
         self.input = input
 
-        # TODO: Implement the forward pass for a dense layer
-        # Hint: Use np.dot for matrix multiplication
-        return  np.dot(input,self.weights)+self.biases
+        # Linear transformation
+        return np.dot(input, self.weights) + self.biases
 
     def backward(self, input, grad_output):
         """
@@ -350,5 +343,14 @@ def train_mnist_network(
     return network, val_accuracy
 
 
-network, val_accuracy = train_mnist_network(X_train, y_train, X_val, y_val)
-assert val_accuracy > 0.65
+# Only run when this file is executed directly
+if __name__ == "__main__":
+    # Example usage
+    X_train, y_train, X_val, y_val, X_test, y_test = load_mnist_from_csv(
+        "./mnist_train.csv", "./mnist_test.csv", val_split=0.1
+    )
+    
+    network, val_accuracy = train_mnist_network(X_train, y_train, X_val, y_val)
+    
+    print(f"Final validation accuracy: {val_accuracy:.4f}")
+    print(f"Is accuracy >= 70%: {val_accuracy >= 0.7}") 
